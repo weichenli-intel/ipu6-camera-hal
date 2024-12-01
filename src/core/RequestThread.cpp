@@ -157,6 +157,8 @@ int RequestThread::processRequest(int bufferNum, camera_buffer_t** ubuffer,
     request.mBufferNum = bufferNum;
     bool hasVideoBuffer = false;
 
+    LOG2("<id%d>%s", mCameraId, __func__);
+
     for (int id = 0; id < bufferNum; id++) {
         request.mBuffer[id] = ubuffer[id];
         if (ubuffer[id]->s.usage == CAMERA_STREAM_PREVIEW ||
@@ -180,6 +182,7 @@ int RequestThread::processRequest(int bufferNum, camera_buffer_t** ubuffer,
     if (mRequestsInProcessing == 0 || !mPerframeControlSupport) {
         mRequestTriggerEvent |= NEW_REQUEST;
         mRequestSignal.signal();
+        LOG2("<id%d>%s: signal new request", mCameraId, __func__);
     }
     return OK;
 }
@@ -326,7 +329,7 @@ bool RequestThread::threadLoop() {
     int64_t applyingSeq = -1;
     {
         ConditionLock lock(mPendingReqLock);
-
+        LOG2("<id%d>%s", mCameraId, __func__);
         if (blockRequest()) {
             int ret = mRequestSignal.waitRelative(lock, kWaitDuration * SLOWLY_MULTIPLIER);
             if (ret == TIMED_OUT) {
@@ -358,6 +361,7 @@ bool RequestThread::threadLoop() {
                 applyingSeq = mLastSofSeq + 1;
             } else {
                 mRequestTriggerEvent = NONE_EVENT;
+                LOG2("<id%d>%s: RequestTriggerEvent is NONE_EVENT", mCameraId, __func__);
                 return true;
             }
 
@@ -379,6 +383,7 @@ bool RequestThread::threadLoop() {
 
     CameraRequest request;
     if (fetchNextRequest(request)) {
+        LOG2("<id%d>%s: handle next request", mCameraId, __func__);
         handleRequest(request, applyingSeq);
         {
             AutoMutex l(mPendingReqLock);
