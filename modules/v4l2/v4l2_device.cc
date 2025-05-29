@@ -444,7 +444,7 @@ int V4L2DevicePoller::Poll(int timeout_ms, int events, std::vector<V4L2Device*>*
     int ret = ::poll(poll_fds_.data(), poll_fds_.size(), timeout_ms);
     if (ret <= 0) {
         for (size_t i = 0; i < devices_.size(); i++) {
-            LOGE("%s: Device node fd %d poll timeout.", __func__, devices_[i]->fd_);
+            LOGE("%s: AAAXXXX Device node fd %d poll timeout %d ms.", __func__, devices_[i]->fd_, timeout_ms);
         }
         return ret;
     }
